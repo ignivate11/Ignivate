@@ -32,6 +32,18 @@ interface PreorderProduct {
   creator: { name: string }
 }
 
+interface ReadyProduct {
+  id: string
+  title: string
+  description: string
+  price: number
+  images: string[]
+  category: string
+  usp: string | null
+  founderName: string | null
+  creator: { name: string }
+}
+
 /* ─── ALL CSS FROM THE LANDING PAGE ─────────────────────────────────────── */
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
@@ -336,18 +348,13 @@ function LaunchCard({ launch }: { launch: Launch }) {
 /* ─── LOGO SVG ───────────────────────────────────────────────────────────── */
 function LogoSVG({ size = 38 }: { size?: number }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 46" fill="none" width={size} height={Math.round(size * 46 / 38)}>
-      <defs>
-        <linearGradient id="lg1" x1="19" y1="0" x2="19" y2="46" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#F07B2E" />
-          <stop offset="100%" stopColor="#E8651A" />
-        </linearGradient>
-      </defs>
-      <path d="M19 2C10 2 3 9 3 18C3 24 6.5 29.5 12 32.5V38C12 39.7 13.3 41 15 41H23C24.7 41 26 39.7 26 38V32.5C31.5 29.5 35 24 35 18C35 9 28 2 19 2Z" fill="url(#lg1)" opacity="0.9" />
-      <path d="M15 41L15 44C15 45.1 16.8 46 19 46C21.2 46 23 45.1 23 44L23 41" fill="#E8651A" />
-      <line x1="15" y1="42.5" x2="23" y2="42.5" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" />
-      <path d="M17 30C17 30 15 35 14 38C15.5 40.5 17 42 19 43C21 42 22.5 40.5 24 38C23 35 21 30 21 30L19 32Z" fill="#F5B731" opacity="0.8" />
-    </svg>
+    <Image
+      src="/ignivate-logo.png"
+      alt="Ignivate"
+      width={size}
+      height={size}
+      style={{ objectFit: 'contain' }}
+    />
   )
 }
 
@@ -359,7 +366,7 @@ const Arrow = () => (
 )
 
 /* ─── HOME CLIENT ────────────────────────────────────────────────────────── */
-export default function HomeClient({ launches, preorderProducts = [] }: { launches: Launch[]; preorderProducts?: PreorderProduct[] }) {
+export default function HomeClient({ launches, readyProducts = [], preorderProducts = [] }: { launches: Launch[]; readyProducts?: ReadyProduct[]; preorderProducts?: PreorderProduct[] }) {
   const { data: session } = useSession()
 
   // Determine dashboard link based on role
@@ -618,9 +625,46 @@ export default function HomeClient({ launches, preorderProducts = [] }: { launch
         <div className="container">
           <span className="section-label fade-up">Marketplace</span>
           <h2 className="section-heading fade-up">Live Launches.</h2>
-          <p className="section-sub fade-up">Real products from real creators. Pre-order early and support what&apos;s next.</p>
+          <p className="section-sub fade-up">Real products from real creators. Ready to buy today.</p>
 
-          {launches.length > 0 ? (
+          {readyProducts.length > 0 ? (
+            <>
+              <div className="launches-grid" style={{ marginTop: '48px' }}>
+                {readyProducts.map((p, i) => (
+                  <div key={p.id} className={`launch-card fade-up s${Math.min(i + 1, 4)}`}>
+                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#0f0f0f', overflow: 'hidden' }}>
+                      {p.images[0] ? (
+                        <Image src={p.images[0]} alt={p.title} fill style={{ objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px' }}>📦</div>
+                      )}
+                      <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(74,222,128,.85)', color: '#000', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '30px' }}>
+                        ✅ LIVE
+                      </div>
+                    </div>
+                    <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <p style={{ fontSize: '12px', color: 'var(--gray-500)', marginBottom: '4px' }}>{p.category} · by {p.creator.name}</p>
+                        <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--white)', marginBottom: '6px' }}>{p.title}</h3>
+                        {p.usp && <p style={{ fontSize: '13px', color: 'var(--gray-300)', lineHeight: 1.6 }}>{p.usp}</p>}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,.06)', marginTop: 'auto' }}>
+                        <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--orange-400)' }}>₹{p.price.toLocaleString('en-IN')}</span>
+                        <Link href={`/products/${p.id}`} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
+                          Buy Now →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '36px' }} className="fade-up">
+                <Link href="/products?type=ready" className="btn btn-secondary">
+                  View all live products <Arrow />
+                </Link>
+              </div>
+            </>
+          ) : launches.length > 0 ? (
             <div className="launches-grid" style={{ marginTop: '48px' }}>
               {launches.map(l => <LaunchCard key={l.id} launch={l} />)}
             </div>
@@ -649,9 +693,9 @@ export default function HomeClient({ launches, preorderProducts = [] }: { launch
       {preorderProducts.length > 0 && (
         <section className="section" id="preorders">
           <div className="container">
-            <span className="section-label fade-up" style={{ color: 'var(--amber)' }}>Fund Early</span>
-            <h2 className="section-heading fade-up">Pre-order Products.</h2>
-            <p className="section-sub fade-up">Back these products before they launch. Get early pricing and help bring them to life.</p>
+            <span className="section-label fade-up" style={{ color: 'var(--amber)' }}>Funding Now</span>
+            <h2 className="section-heading fade-up">Pre-Order Launches.</h2>
+            <p className="section-sub fade-up">Back these products before they ship. Get early pricing and help bring them to life.</p>
             <div className="launches-grid" style={{ marginTop: '40px' }}>
               {preorderProducts.map((p, i) => {
                 const pct = p.fundingGoal && p.fundingGoal > 0
