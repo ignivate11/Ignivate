@@ -1,0 +1,35 @@
+Copy these into Vercel → Project → Settings → Environment Variables
+Add each one as a separate variable. Set environment to "Production".
+
+────────────────────────────────────────────────────────────────────
+NAME                          VALUE
+────────────────────────────────────────────────────────────────────
+DATABASE_URL                  postgresql://neondb_owner:npg_xFSBvglr90TH@ep-tiny-tree-aompoe58-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+AUTH_SECRET                   lp5nNee0KEVoFCI2FGSMXXCfLt+s6YDXqvCLR8XzfyU=
+
+NEXTAUTH_SECRET               lp5nNee0KEVoFCI2FGSMXXCfLt+s6YDXqvCLR8XzfyU=
+
+NEXTAUTH_URL                  https://YOUR-APP-NAME.vercel.app
+                              (replace with your actual Vercel URL after first deploy)
+
+CLOUDINARY_CLOUD_NAME         drpogxsns
+
+CLOUDINARY_API_KEY            144782558725748
+
+CLOUDINARY_API_SECRET         Tj3TbhrP3yB7cHCb85ugrE96pIg
+
+RAZORPAY_KEY_ID               rzp_test_placeholder
+                              (replace with real key from razorpay.com/dashboard)
+
+RAZORPAY_KEY_SECRET           placeholder
+                              (replace with real secret)
+
+NEXT_PUBLIC_RAZORPAY_KEY_ID   rzp_test_placeholder
+                              (same as RAZORPAY_KEY_ID)
+────────────────────────────────────────────────────────────────────
+
+AFTER FIRST DEPLOY:
+1. Copy your Vercel URL (e.g. https://ignivate-abc123.vercel.app)
+2. Update NEXTAUTH_URL to that URL
+3. Redeploy once more

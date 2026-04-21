@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CREATOR
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum LaunchType {
+  LIVE
+  PREORDER
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String?
+  role      Role       @default(CUSTOMER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+
+  accounts Account[]
+  products Product[]
+  orders   Order[]
+  cart     Cart[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  creatorId   String
+  title       String
+  description String        @db.Text
+  price       Float
+  images      String[]
+  status      ProductStatus @default(PENDING)
+  category    String        @default("General")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  creator User    @relation(fields: [creatorId], references: [id])
+  orders  Order[]
+  cart    Cart[]
+
+  @@index([status])
+  @@index([creatorId])
+  @@index([category])
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  userId            String
+  productId         String
+  creatorId         String
+  totalAmount       Float
+  platformFee       Float
+  creatorEarnings   Float
+  paymentStatus     PaymentStatus @default(PENDING)
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?
+  createdAt         DateTime      @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([userId])
+  @@index([creatorId])
+  @@index([paymentStatus])
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model Launch {
+  id                 String     @id @default(cuid())
+  productName        String
+  creatorName        String
+  creatorDescription String     @db.Text
+  productDescription String     @db.Text
+  usp                String     @db.Text
+  problemStatement   String     @db.Text
+  price              Float
+  images             String[]
+  launchType         LaunchType @default(LIVE)
+  isPublished        Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([isPublished])
+  @@index([launchType])
+}
