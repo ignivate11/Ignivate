@@ -631,7 +631,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
             <>
               <div className="launches-grid" style={{ marginTop: '48px' }}>
                 {readyProducts.map((p, i) => (
-                  <div key={p.id} className={`launch-card fade-up s${Math.min(i + 1, 4)}`}>
+                  <Link key={p.id} href={`/products/${p.id}`} className={`launch-card fade-up s${Math.min(i + 1, 4)}`} style={{ textDecoration: 'none', cursor: 'pointer' }}>
                     <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#0f0f0f', overflow: 'hidden' }}>
                       {p.images[0] ? (
                         <Image src={p.images[0]} alt={p.title} fill style={{ objectFit: 'cover' }} />
@@ -650,12 +650,12 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,.06)', marginTop: 'auto' }}>
                         <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--orange-400)' }}>₹{p.price.toLocaleString('en-IN')}</span>
-                        <Link href={`/products/${p.id}`} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
+                        <span className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
                           Buy Now →
-                        </Link>
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
               <div style={{ textAlign: 'center', marginTop: '36px' }} className="fade-up">
@@ -706,7 +706,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                   ? Math.max(0, Math.ceil((new Date(p.launchDate).getTime() - Date.now()) / 86400000))
                   : null
                 return (
-                  <div key={p.id} className={`preorder-card fade-up s${Math.min(i + 1, 4)}`}>
+                  <Link key={p.id} href={`/products/${p.id}`} className={`preorder-card fade-up s${Math.min(i + 1, 4)}`} style={{ textDecoration: 'none', cursor: 'pointer' }}>
                     <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#0f0f0f', overflow: 'hidden' }}>
                       {p.images[0] ? (
                         <Image src={p.images[0]} alt={p.title} fill style={{ objectFit: 'cover' }} />
@@ -746,12 +746,12 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                             <span style={{ fontSize: '12px', color: 'var(--gray-500)', textDecoration: 'line-through', marginLeft: '8px' }}>₹{p.price.toLocaleString('en-IN')}</span>
                           )}
                         </div>
-                        <Link href={`/products/${p.id}`} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
+                        <span className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
                           Fund Now →
-                        </Link>
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
@@ -1023,6 +1023,14 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                 <a href="https://instagram.com/ignivate" target="_blank" rel="noopener noreferrer" className="contact-channel">
                   <div className="ch-icon">📷</div>
                   <div><div className="ch-label">Instagram</div><div className="ch-value">@ignivate</div></div>
+                </a>
+                <a href="https://www.linkedin.com/company/ignivatein/" target="_blank" rel="noopener noreferrer" className="contact-channel">
+                  <div className="ch-icon">💼</div>
+                  <div><div className="ch-label">LinkedIn</div><div className="ch-value">Ignivate on LinkedIn</div></div>
+                </a>
+                <a href="https://x.com/ignivate?s=21" target="_blank" rel="noopener noreferrer" className="contact-channel">
+                  <div className="ch-icon">𝕏</div>
+                  <div><div className="ch-label">X (Twitter)</div><div className="ch-value">@ignivate</div></div>
                 </a>
               </div>
               <div className="contact-response">⏱ We aim to respond within 24–48 hours.</div>

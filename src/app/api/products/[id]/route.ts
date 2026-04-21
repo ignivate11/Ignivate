@@ -28,6 +28,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   const body = await req.json()
+
+  // Resubmit for approval (no full validation needed — just reset status)
+  if (body._resubmit) {
+    const updated = await prisma.product.update({
+      where: { id: params.id },
+      data: { status: 'PENDING' },
+    })
+    return NextResponse.json(updated)
+  }
+
   if (body.fundingGoal) body.fundingGoal = Number(body.fundingGoal)
   if (body.preorderPrice) body.preorderPrice = Number(body.preorderPrice)
 

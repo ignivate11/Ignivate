@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge'
 import Image from 'next/image'
 import Link from 'next/link'
 import DeleteProductButton from './DeleteProductButton'
+import ResubmitButton from './ResubmitButton'
 
 export default async function CreatorProductsPage() {
   const session = await auth()
@@ -36,27 +37,42 @@ export default async function CreatorProductsPage() {
       ) : (
         <div className="space-y-3">
           {products.map(p => (
-            <div key={p.id} className="bg-[#111] border border-white/8 rounded-2xl p-5 flex gap-4 items-center">
-              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white/5">
-                {p.images[0]
-                  ? <Image src={p.images[0]} alt={p.title} fill className="object-cover" />
-                  : <div className="absolute inset-0 flex items-center justify-center">📦</div>
-                }
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white">{p.title}</h3>
-                <p className="text-xs text-gray-500">{p.category} · {formatDate(p.createdAt)}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="font-bold text-orange-400">{formatCurrency(p.price)}</span>
-                <Badge variant={p.status.toLowerCase() as 'pending' | 'approved' | 'rejected'}>{p.status}</Badge>
-                <div className="flex gap-2">
-                  {p.status !== 'APPROVED' && (
-                    <Link href={`/creator/products/${p.id}/edit`} className="text-xs border border-white/15 text-gray-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-full transition-all">
+            <div key={p.id} className="bg-[#111] border border-white/8 rounded-2xl p-5">
+              <div className="flex gap-4 items-center">
+                <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                  {p.images[0]
+                    ? <Image src={p.images[0]} alt={p.title} fill className="object-cover" />
+                    : <div className="absolute inset-0 flex items-center justify-center">📦</div>
+                  }
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="font-semibold text-white">{p.title}</h3>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${p.saleCategory === 'PREORDER' ? 'bg-amber-500/10 text-amber-400' : 'bg-green-500/10 text-green-400'}`}>
+                      {p.saleCategory === 'PREORDER' ? '🚀 Pre-order' : '✅ Ready'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">{p.category} · {formatDate(p.createdAt)}</p>
+                  {p.status === 'APPROVED' && (
+                    <p className="text-xs text-green-400 mt-0.5">Live — editing will send back for approval</p>
+                  )}
+                  {p.status === 'REJECTED' && (
+                    <p className="text-xs text-red-400 mt-0.5">Rejected — edit and re-submit</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="font-bold text-orange-400">{formatCurrency(p.price)}</span>
+                  <Badge variant={p.status.toLowerCase() as 'pending' | 'approved' | 'rejected'}>{p.status}</Badge>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/creator/products/${p.id}/edit`}
+                      className="text-xs border border-white/15 text-gray-400 hover:text-white hover:border-white/30 px-3 py-1.5 rounded-full transition-all"
+                    >
                       Edit
                     </Link>
-                  )}
-                  <DeleteProductButton productId={p.id} />
+                    {p.status === 'REJECTED' && <ResubmitButton productId={p.id} />}
+                    <DeleteProductButton productId={p.id} />
+                  </div>
                 </div>
               </div>
             </div>

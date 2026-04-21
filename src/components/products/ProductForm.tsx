@@ -26,6 +26,8 @@ interface ProductFormProps {
     launchDate?: Date | string | null
     preorderPrice?: number | null
   }
+  isAdmin?: boolean
+  autoApprove?: boolean
 }
 
 const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm outline-none transition-all focus:border-orange-500 focus:ring-1 focus:ring-orange-500/30 resize-none"
@@ -34,7 +36,7 @@ const sectionClass = "bg-white/3 border border-white/8 rounded-2xl p-6 space-y-5
 const sectionTitle = "text-base font-semibold text-white mb-1"
 const sectionSub = "text-xs text-gray-500 mb-4"
 
-export default function ProductForm({ product }: ProductFormProps) {
+export default function ProductForm({ product, isAdmin = false, autoApprove = false }: ProductFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -120,13 +122,13 @@ export default function ProductForm({ product }: ProductFormProps) {
       payload.preorderPrice = Number(form.preorderPrice)
     }
 
-    const url = product ? `/api/products/${product.id}` : '/api/products'
+    const url = product ? `/api/products/${product.id}` : isAdmin ? '/api/admin/products' : '/api/products'
     const method = product ? 'PATCH' : 'POST'
 
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(isAdmin && !product ? { ...payload, autoApprove } : payload),
     })
 
     setLoading(false)

@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/utils'
 import Badge from '@/components/ui/Badge'
 import CreateCreatorForm from './CreateCreatorForm'
 import { CreatorActions } from './CreatorActions'
+import EditCreatorModal from './EditCreatorModal'
 
 export default async function AdminCreatorsPage() {
   const creators = await prisma.user.findMany({
@@ -43,6 +44,7 @@ export default async function AdminCreatorsPage() {
                 <div><p className="text-lg font-bold text-white">{creator._count.products}</p><p className="text-xs text-gray-500">Products</p></div>
                 <div><p className="text-lg font-bold text-white">{creator._count.orders}</p><p className="text-xs text-gray-500">Orders</p></div>
                 <Badge variant={creator.status.toLowerCase() as 'active' | 'suspended'}>{creator.status}</Badge>
+                <EditCreatorModal creator={{ id: creator.id, name: creator.name, email: creator.email, status: creator.status }} />
                 <CreatorActions id={creator.id} name={creator.name} status={creator.status} />
               </div>
             </div>

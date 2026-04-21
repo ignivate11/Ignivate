@@ -56,6 +56,11 @@ function LoginForm() {
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
             <Input label="Password" type="password" placeholder="••••••••" value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
+            <div className="text-right -mt-2">
+              <Link href="/forgot-password" className="text-xs text-orange-400 hover:text-orange-300 transition-colors">
+                Forgot password?
+              </Link>
+            </div>
             <Button type="submit" loading={loading} className="w-full mt-2">Sign in</Button>
           </form>
         </div>

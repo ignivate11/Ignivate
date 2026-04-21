@@ -50,10 +50,11 @@ model User {
   status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
 
-  accounts Account[]
-  products Product[]
-  orders   Order[]
-  cart     Cart[]
+  accounts      Account[]
+  products      Product[]
+  orders        Order[]
+  cart          Cart[]
+  passwordResets PasswordResetToken[]
 
   @@index([email])
   @@index([role])
@@ -78,6 +79,19 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
 model Product {
   id          String        @id @default(cuid())
   creatorId   String
@@ -88,17 +102,14 @@ model Product {
   status      ProductStatus @default(PENDING)
   category    String        @default("General")
 
-  // Sale category system
   saleCategory  SaleCategory @default(READY)
 
-  // Required for all products
   problemStatement String? @db.Text
   usp              String? @db.Text
   founderName      String?
   teamDescription  String? @db.Text
   creatorStory     String? @db.Text
 
-  // Pre-order only fields
   estimatedCompletion DateTime?
   fundingGoal         Float?
   currentFunding      Float?    @default(0)
