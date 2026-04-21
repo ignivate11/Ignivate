@@ -24,7 +24,16 @@ export async function POST(req: Request) {
   const order = await prisma.order.update({
     where: { id: orderId },
     data: { paymentStatus: 'PAID', razorpayPaymentId },
+    include: { product: true },
   })
+
+  // If product is a preorder, increment currentFunding
+  if (order.product.saleCategory === 'PREORDER') {
+    await prisma.product.update({
+      where: { id: order.productId },
+      data: { currentFunding: { increment: order.totalAmount } },
+    })
+  }
 
   await prisma.cart.deleteMany({
     where: { userId: session.user.id, productId: order.productId },

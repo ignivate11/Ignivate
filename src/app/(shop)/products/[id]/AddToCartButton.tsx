@@ -4,17 +4,19 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 
 interface Props {
-  product: { id: string; title: string; price: number; images: string[]; creator: { name: string } }
+  product: { id: string; title: string; price: number; images: string[]; creator: { name: string }; preorderPrice?: number | null }
   session: { user: { role: string } } | null
+  isPreorder?: boolean
 }
 
-export default function AddToCartButton({ product, session }: Props) {
+export default function AddToCartButton({ product, session, isPreorder }: Props) {
   const addItem = useCart(s => s.addItem)
+  const price = isPreorder && product.preorderPrice ? product.preorderPrice : product.price
 
   if (!session) {
     return (
       <Link href="/login" className="block w-full text-center bg-gradient-to-r from-orange-600 to-orange-400 text-white font-semibold py-3.5 rounded-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-orange-500/25">
-        Login to Purchase
+        Login to {isPreorder ? 'Pre-order' : 'Purchase'}
       </Link>
     )
   }
@@ -26,12 +28,12 @@ export default function AddToCartButton({ product, session }: Props) {
   return (
     <button
       onClick={() => {
-        addItem({ productId: product.id, title: product.title, price: product.price, image: product.images[0] || '', creatorName: product.creator.name, quantity: 1 })
-        toast.success('Added to cart!')
+        addItem({ productId: product.id, title: product.title, price, image: product.images[0] || '', creatorName: product.creator.name, quantity: 1 })
+        toast.success(isPreorder ? 'Pre-order added to cart!' : 'Added to cart!')
       }}
       className="w-full bg-gradient-to-r from-orange-600 to-orange-400 text-white font-semibold py-3.5 rounded-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-orange-500/25"
     >
-      Add to Cart
+      {isPreorder ? '🚀 Pre-order Now' : 'Add to Cart'}
     </button>
   )
 }

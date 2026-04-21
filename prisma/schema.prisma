@@ -36,6 +36,11 @@ enum LaunchType {
   PREORDER
 }
 
+enum SaleCategory {
+  READY
+  PREORDER
+}
+
 model User {
   id        String     @id @default(cuid())
   name      String
@@ -82,8 +87,26 @@ model Product {
   images      String[]
   status      ProductStatus @default(PENDING)
   category    String        @default("General")
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+
+  // Sale category system
+  saleCategory  SaleCategory @default(READY)
+
+  // Required for all products
+  problemStatement String? @db.Text
+  usp              String? @db.Text
+  founderName      String?
+  teamDescription  String? @db.Text
+  creatorStory     String? @db.Text
+
+  // Pre-order only fields
+  estimatedCompletion DateTime?
+  fundingGoal         Float?
+  currentFunding      Float?    @default(0)
+  launchDate          DateTime?
+  preorderPrice       Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   creator User    @relation(fields: [creatorId], references: [id])
   orders  Order[]
@@ -92,6 +115,7 @@ model Product {
   @@index([status])
   @@index([creatorId])
   @@index([category])
+  @@index([saleCategory])
 }
 
 model Order {

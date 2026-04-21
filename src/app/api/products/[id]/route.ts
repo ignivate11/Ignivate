@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { productSchema } from '@/schemas/product'
+import { calculateFees } from '@/lib/utils'
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   const product = await prisma.product.findUnique({
@@ -27,14 +28,35 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   const body = await req.json()
+  if (body.fundingGoal) body.fundingGoal = Number(body.fundingGoal)
+  if (body.preorderPrice) body.preorderPrice = Number(body.preorderPrice)
+
   const parsed = productSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
+  const data = parsed.data
   const updated = await prisma.product.update({
     where: { id: params.id },
-    data: { ...parsed.data, status: 'PENDING' },
+    data: {
+      title: data.title,
+      description: data.description,
+      price: data.price,
+      images: data.images,
+      category: data.category,
+      saleCategory: data.saleCategory,
+      problemStatement: data.problemStatement,
+      usp: data.usp,
+      founderName: data.founderName,
+      teamDescription: data.teamDescription,
+      creatorStory: data.creatorStory,
+      estimatedCompletion: data.estimatedCompletion ? new Date(data.estimatedCompletion) : null,
+      fundingGoal: data.fundingGoal,
+      launchDate: data.launchDate ? new Date(data.launchDate) : null,
+      preorderPrice: data.preorderPrice,
+      status: 'PENDING',
+    },
   })
 
   return NextResponse.json(updated)

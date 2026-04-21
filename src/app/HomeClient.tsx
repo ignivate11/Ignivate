@@ -16,6 +16,22 @@ interface Launch {
   launchType: 'LIVE' | 'PREORDER'
 }
 
+interface PreorderProduct {
+  id: string
+  title: string
+  description: string
+  price: number
+  preorderPrice: number | null
+  fundingGoal: number | null
+  currentFunding: number | null
+  launchDate: Date | null
+  estimatedCompletion: Date | null
+  images: string[]
+  founderName: string | null
+  usp: string | null
+  creator: { name: string }
+}
+
 /* ─── ALL CSS FROM THE LANDING PAGE ─────────────────────────────────────── */
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
@@ -240,6 +256,10 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 }
 .launch-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:20px;overflow:hidden;transition:all .4s;display:flex;flex-direction:column}
 .launch-card:hover{border-color:rgba(232,101,26,.25);transform:translateY(-4px);box-shadow:0 16px 48px rgba(232,101,26,.08)}
+.preorder-card{background:var(--dark-card);border:1px solid rgba(245,183,49,.15);border-radius:20px;overflow:hidden;transition:all .4s;display:flex;flex-direction:column}
+.preorder-card:hover{border-color:rgba(245,183,49,.35);transform:translateY(-4px);box-shadow:0 16px 48px rgba(245,183,49,.08)}
+.funding-bar-wrap{height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.funding-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--orange-600),var(--amber))}
 .launch-img-wrap{position:relative;width:100%;padding-top:56.25%;overflow:hidden;background:#111}
 .launch-img-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3}
 .launch-img-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:background .2s;border:none}
@@ -339,7 +359,7 @@ const Arrow = () => (
 )
 
 /* ─── HOME CLIENT ────────────────────────────────────────────────────────── */
-export default function HomeClient({ launches }: { launches: Launch[] }) {
+export default function HomeClient({ launches, preorderProducts = [] }: { launches: Launch[]; preorderProducts?: PreorderProduct[] }) {
   const { data: session } = useSession()
 
   // Determine dashboard link based on role
@@ -624,6 +644,81 @@ export default function HomeClient({ launches }: { launches: Launch[] }) {
           <Link href="/products" className="btn btn-green btn-xs">Pre-order now →</Link>
         </div></div>
       </div>
+
+      {/* ── PRE-ORDER PRODUCTS (from DB) ─────────────────────────────────── */}
+      {preorderProducts.length > 0 && (
+        <section className="section" id="preorders">
+          <div className="container">
+            <span className="section-label fade-up" style={{ color: 'var(--amber)' }}>Fund Early</span>
+            <h2 className="section-heading fade-up">Pre-order Products.</h2>
+            <p className="section-sub fade-up">Back these products before they launch. Get early pricing and help bring them to life.</p>
+            <div className="launches-grid" style={{ marginTop: '40px' }}>
+              {preorderProducts.map((p, i) => {
+                const pct = p.fundingGoal && p.fundingGoal > 0
+                  ? Math.min(100, Math.round(((p.currentFunding || 0) / p.fundingGoal) * 100))
+                  : 0
+                const displayPrice = p.preorderPrice || p.price
+                const daysLeft = p.launchDate
+                  ? Math.max(0, Math.ceil((new Date(p.launchDate).getTime() - Date.now()) / 86400000))
+                  : null
+                return (
+                  <div key={p.id} className={`preorder-card fade-up s${Math.min(i + 1, 4)}`}>
+                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#0f0f0f', overflow: 'hidden' }}>
+                      {p.images[0] ? (
+                        <Image src={p.images[0]} alt={p.title} fill style={{ objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px' }}>📦</div>
+                      )}
+                      <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(245,183,49,.9)', color: '#000', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '30px' }}>
+                        🚀 PRE-ORDER
+                      </div>
+                      {daysLeft !== null && (
+                        <div style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,.75)', color: 'var(--gray-300)', fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '30px' }}>
+                          {daysLeft}d left
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--white)', marginBottom: '4px' }}>{p.title}</h3>
+                        <p style={{ fontSize: '12px', color: 'var(--gray-500)' }}>by {p.creator.name}</p>
+                      </div>
+                      {p.usp && <p style={{ fontSize: '13px', color: 'var(--gray-300)', lineHeight: 1.6, flex: 1 }}>{p.usp}</p>}
+                      {p.fundingGoal && (
+                        <div>
+                          <div className="funding-bar-wrap">
+                            <div className="funding-bar-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                            <span style={{ color: 'var(--amber)', fontWeight: 700 }}>{pct}% funded</span>
+                            <span style={{ color: 'var(--gray-500)' }}>of ₹{p.fundingGoal.toLocaleString('en-IN')} goal</span>
+                          </div>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,.06)', marginTop: 'auto' }}>
+                        <div>
+                          <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--amber)' }}>₹{displayPrice.toLocaleString('en-IN')}</span>
+                          {p.preorderPrice && (
+                            <span style={{ fontSize: '12px', color: 'var(--gray-500)', textDecoration: 'line-through', marginLeft: '8px' }}>₹{p.price.toLocaleString('en-IN')}</span>
+                          )}
+                        </div>
+                        <Link href={`/products/${p.id}`} className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
+                          Fund Now →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '36px' }} className="fade-up">
+              <Link href="/products?type=preorder" className="btn btn-secondary">
+                View all pre-orders <Arrow />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── HOW IT WORKS — CREATORS ──────────────────────────────────────── */}
       <section className="section" id="how-creators">
