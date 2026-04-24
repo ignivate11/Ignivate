@@ -84,6 +84,7 @@ export default async function AdminProductsPage() {
                 <Link href={`/admin/products/${p.id}`} className="text-xs text-gray-500 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-full transition-all">
                   View →
                 </Link>
+                <ApprovalActions productId={p.id} />
               </div>
             </div>
           ))}

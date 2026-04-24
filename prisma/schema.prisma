@@ -55,6 +55,7 @@ model User {
   orders        Order[]
   cart          Cart[]
   passwordResets PasswordResetToken[]
+  ratings        Rating[]
 
   @@index([email])
   @@index([role])
@@ -122,6 +123,7 @@ model Product {
   creator User    @relation(fields: [creatorId], references: [id])
   orders  Order[]
   cart    Cart[]
+  ratings Rating[]
 
   @@index([status])
   @@index([creatorId])
@@ -181,4 +183,20 @@ model Launch {
 
   @@index([isPublished])
   @@index([launchType])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  review    String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([userId])
 }

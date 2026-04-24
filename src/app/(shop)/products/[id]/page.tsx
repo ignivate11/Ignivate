@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import Image from 'next/image'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import AddToCartButton from './AddToCartButton'
+import StarRating from '@/components/products/StarRating'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = await prisma.product.findUnique({ where: { id: params.id } })
@@ -20,10 +21,7 @@ function FundingBar({ current, goal }: { current: number; goal: number }) {
         <span className="text-gray-500">of {formatCurrency(goal)} goal</span>
       </div>
       <div className="relative h-3 bg-white/8 rounded-full overflow-hidden">
-        <div
-          className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-orange-600 to-amber-400 transition-all"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-orange-600 to-amber-400 transition-all" style={{ width: `${pct}%` }} />
       </div>
       <p className="text-xs text-orange-400 font-semibold">{pct}% funded</p>
     </div>
@@ -45,7 +43,10 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   const [product, session] = await Promise.all([
     prisma.product.findUnique({
       where: { id: params.id },
-      include: { creator: { select: { id: true, name: true } } },
+      include: {
+        creator: { select: { id: true, name: true } },
+        ratings: { select: { rating: true } },
+      },
     }),
     auth(),
   ])
@@ -53,21 +54,31 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   if (!product || product.status !== 'APPROVED') notFound()
 
   const isPreorder = product.saleCategory === 'PREORDER'
-  const fundingPct = isPreorder && product.fundingGoal
-    ? Math.min(100, Math.round(((product.currentFunding || 0) / product.fundingGoal) * 100))
+  const isCustomer = session?.user.role === 'CUSTOMER'
+
+  // Rating stats
+  const ratingCount = product.ratings.length
+  const ratingAverage = ratingCount > 0
+    ? Math.round((product.ratings.reduce((s, r) => s + r.rating, 0) / ratingCount) * 10) / 10
     : 0
+  const userRating = session
+    ? (await prisma.rating.findUnique({
+        where: { userId_productId: { userId: session.user.id, productId: params.id } },
+        select: { rating: true },
+      }))?.rating ?? null
+    : null
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-        {/* ── LEFT: Images ─────────────────────────────────────────── */}
+        {/* ── LEFT ──────────────────────────────────────────────── */}
         <div className="space-y-4">
           {product.images[0] && (
             <div className="relative h-96 rounded-2xl overflow-hidden bg-[#111]">
               <Image src={product.images[0]} alt={product.title} fill className="object-cover" />
               {isPreorder && (
-                <div className="absolute top-4 left-4 flex items-center gap-2 bg-amber-500/90 text-black text-xs font-bold px-3 py-1.5 rounded-full">
+                <div className="absolute top-4 left-4 bg-amber-500/90 text-black text-xs font-bold px-3 py-1.5 rounded-full">
                   🚀 PRE-ORDER
                 </div>
               )}
@@ -81,27 +92,33 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             ))}
           </div>
 
-          {/* Founder card on desktop */}
-          {(product.founderName || product.creatorStory) && (
-            <div className="hidden lg:block bg-[#111] border border-white/8 rounded-2xl p-6 space-y-3">
-              <h3 className="font-semibold text-white text-sm">👤 About the Founder</h3>
-              {product.founderName && (
-                <p className="text-orange-400 font-semibold text-sm">{product.founderName}</p>
-              )}
-              {product.teamDescription && (
-                <p className="text-gray-400 text-sm leading-relaxed">{product.teamDescription}</p>
-              )}
-              {product.creatorStory && (
-                <>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-3">Why they&apos;re building this</p>
-                  <p className="text-gray-400 text-sm leading-relaxed italic">&ldquo;{product.creatorStory}&rdquo;</p>
-                </>
-              )}
+          {/* ── Creator Info Card ──────────────────────────────── */}
+          <div className="bg-[#111] border border-white/8 rounded-2xl p-5 space-y-4">
+            <p className="text-xs font-mono text-orange-400 uppercase tracking-widest">About the Creator</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                {product.creator.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-semibold text-white">{product.founderName || product.creator.name}</p>
+                {product.founderName && (
+                  <p className="text-xs text-gray-500">Founder · {product.creator.name}</p>
+                )}
+              </div>
             </div>
-          )}
+            {product.teamDescription && (
+              <p className="text-sm text-gray-400 leading-relaxed">{product.teamDescription}</p>
+            )}
+            {product.creatorStory && (
+              <div className="border-t border-white/6 pt-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Why they&apos;re building this</p>
+                <p className="text-sm text-gray-400 leading-relaxed italic">&ldquo;{product.creatorStory}&rdquo;</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ── RIGHT: Details ───────────────────────────────────────── */}
+        {/* ── RIGHT ─────────────────────────────────────────────── */}
         <div className="space-y-5">
           <div>
             <span className="text-xs font-mono text-orange-400 uppercase tracking-widest">{product.category}</span>
@@ -109,7 +126,24 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             <p className="text-gray-500 text-sm">by {product.creator.name} · {formatDate(product.createdAt)}</p>
           </div>
 
-          {/* Pricing card */}
+          {/* ── Ratings ───────────────────────────────────────── */}
+          <div className="bg-[#111] border border-white/8 rounded-2xl p-5">
+            <p className="text-xs font-mono text-orange-400 uppercase tracking-widest mb-3">Ratings</p>
+            <StarRating
+              productId={product.id}
+              initialAverage={ratingAverage}
+              initialCount={ratingCount}
+              initialUserRating={userRating}
+              isCustomer={!!isCustomer}
+            />
+            {!session && (
+              <p className="text-xs text-gray-600 mt-2">
+                <a href="/login" className="text-orange-400 hover:text-orange-300">Login</a> to rate this product
+              </p>
+            )}
+          </div>
+
+          {/* ── Pricing ───────────────────────────────────────── */}
           <div className="bg-[#111] border border-white/8 rounded-2xl p-6 space-y-4">
             {isPreorder && product.preorderPrice ? (
               <>
@@ -118,11 +152,9 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
                     {formatCurrency(product.preorderPrice)}
                   </p>
                   <p className="text-gray-500 line-through text-lg mb-1">{formatCurrency(product.price)}</p>
-                  <span className="mb-1 text-xs bg-green-500/15 text-green-400 border border-green-500/20 px-2 py-0.5 rounded-full font-semibold">
-                    Early bird
-                  </span>
+                  <span className="mb-1 text-xs bg-green-500/15 text-green-400 border border-green-500/20 px-2 py-0.5 rounded-full font-semibold">Early bird</span>
                 </div>
-                <p className="text-xs text-gray-500">Pre-order at a discounted price. Pay full price {formatCurrency(product.price)} after launch.</p>
+                <p className="text-xs text-gray-500">Pre-order at a discounted price. Full price {formatCurrency(product.price)} after launch.</p>
               </>
             ) : (
               <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">
@@ -130,7 +162,6 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               </p>
             )}
 
-            {/* Funding progress for preorders */}
             {isPreorder && product.fundingGoal && (
               <FundingBar current={product.currentFunding || 0} goal={product.fundingGoal} />
             )}
@@ -142,7 +173,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             />
           </div>
 
-          {/* Launch timeline */}
+          {/* ── Timeline (preorder) ───────────────────────────── */}
           {isPreorder && (product.launchDate || product.estimatedCompletion) && (
             <div className="bg-[#111] border border-orange-500/15 rounded-2xl p-5">
               <p className="text-xs font-mono text-orange-400 uppercase tracking-widest mb-4">Timeline</p>
@@ -163,7 +194,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             </div>
           )}
 
-          {/* Problem + USP */}
+          {/* ── Problem + USP ─────────────────────────────────── */}
           {(product.problemStatement || product.usp) && (
             <div className="bg-[#111] border border-white/8 rounded-2xl p-6 space-y-4">
               {product.problemStatement && (
@@ -181,32 +212,17 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             </div>
           )}
 
-          {/* About */}
+          {/* ── Description ───────────────────────────────────── */}
           <div className="bg-[#111] border border-white/8 rounded-2xl p-6">
             <h3 className="font-semibold text-white mb-3">About this product</h3>
             <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">{product.description}</p>
           </div>
 
-          {/* Founder on mobile */}
-          {(product.founderName || product.creatorStory) && (
-            <div className="lg:hidden bg-[#111] border border-white/8 rounded-2xl p-6 space-y-3">
-              <h3 className="font-semibold text-white text-sm">👤 About the Founder</h3>
-              {product.founderName && <p className="text-orange-400 font-semibold text-sm">{product.founderName}</p>}
-              {product.teamDescription && <p className="text-gray-400 text-sm leading-relaxed">{product.teamDescription}</p>}
-              {product.creatorStory && (
-                <>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-3">Why they&apos;re building this</p>
-                  <p className="text-gray-400 text-sm leading-relaxed italic">&ldquo;{product.creatorStory}&rdquo;</p>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Preorder disclaimer */}
+          {/* ── Preorder disclaimer ───────────────────────────── */}
           {isPreorder && (
             <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4">
               <p className="text-xs text-amber-400/80 leading-relaxed">
-                ⚠️ <strong className="text-amber-400">Pre-order notice:</strong> This is a pre-order product still in development. Delivery is estimated by {product.estimatedCompletion ? formatDate(product.estimatedCompletion) : 'the stated timeline'}. The creator is committed to full refunds if delivery fails.
+                ⚠️ <strong className="text-amber-400">Pre-order notice:</strong> This product is still in development. The creator is committed to full refunds if delivery fails.
               </p>
             </div>
           )}
