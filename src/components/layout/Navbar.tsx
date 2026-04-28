@@ -49,7 +49,7 @@ function ProfileDropdown({ session }: { session: { user: { name?: string | null;
             {isCreator && (
               <>
                 <DropdownLink href="/creator" onClick={() => setOpen(false)}>Dashboard</DropdownLink>
-                <DropdownLink href="/creator/profile" onClick={() => setOpen(false)}>Profile Info</DropdownLink>
+                <DropdownLink href="/profile" onClick={() => setOpen(false)}>My Profile</DropdownLink>
                 <DropdownLink href="/creator/change-password" onClick={() => setOpen(false)}>Change Password</DropdownLink>
               </>
             )}

@@ -44,7 +44,14 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     prisma.product.findUnique({
       where: { id: params.id },
       include: {
-        creator: { select: { id: true, name: true } },
+        creator: {
+          select: {
+            id: true, name: true, avatar: true,
+            bio: true, founderStory: true, teamDetails: true,
+            linkedinUrl: true, twitterUrl: true, websiteUrl: true,
+            experienceLevel: true, skills: true, location: true,
+          }
+        },
         ratings: { select: { rating: true } },
       },
     }),
@@ -96,23 +103,68 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           <div className="bg-[#111] border border-white/8 rounded-2xl p-5 space-y-4">
             <p className="text-xs font-mono text-orange-400 uppercase tracking-widest">About the Creator</p>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                {product.creator.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
+              {product.creator.avatar ? (
+                <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
+                  <Image src={product.creator.avatar} alt={product.creator.name} fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  {product.creator.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1">
                 <p className="font-semibold text-white">{product.founderName || product.creator.name}</p>
-                {product.founderName && (
-                  <p className="text-xs text-gray-500">Founder · {product.creator.name}</p>
+                {product.creator.experienceLevel && (
+                  <span className="inline-block text-xs bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2 py-0.5 rounded-full mt-0.5">
+                    {product.creator.experienceLevel}
+                  </span>
+                )}
+                {product.creator.location && (
+                  <p className="text-xs text-gray-500 mt-0.5">📍 {product.creator.location}</p>
                 )}
               </div>
             </div>
-            {product.teamDescription && (
-              <p className="text-sm text-gray-400 leading-relaxed">{product.teamDescription}</p>
+            {product.creator.bio && (
+              <p className="text-sm text-gray-400 leading-relaxed">{product.creator.bio}</p>
             )}
-            {product.creatorStory && (
+            {(product.teamDescription || product.creator.teamDetails) && (
+              <div className="border-t border-white/6 pt-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">The Team</p>
+                <p className="text-sm text-gray-400 leading-relaxed">{product.teamDescription || product.creator.teamDetails}</p>
+              </div>
+            )}
+            {(product.creatorStory || product.creator.founderStory) && (
               <div className="border-t border-white/6 pt-3">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Why they&apos;re building this</p>
-                <p className="text-sm text-gray-400 leading-relaxed italic">&ldquo;{product.creatorStory}&rdquo;</p>
+                <p className="text-sm text-gray-400 leading-relaxed italic">&ldquo;{product.creatorStory || product.creator.founderStory}&rdquo;</p>
+              </div>
+            )}
+            {product.creator.skills && product.creator.skills.length > 0 && (
+              <div className="border-t border-white/6 pt-3 flex flex-wrap gap-1.5">
+                {product.creator.skills.map((skill: string) => (
+                  <span key={skill} className="text-xs bg-white/5 border border-white/10 text-gray-400 px-2.5 py-1 rounded-full">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+            {(product.creator.linkedinUrl || product.creator.twitterUrl || product.creator.websiteUrl) && (
+              <div className="border-t border-white/6 pt-3 flex gap-3">
+                {product.creator.linkedinUrl && (
+                  <a href={product.creator.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                    LinkedIn →
+                  </a>
+                )}
+                {product.creator.twitterUrl && (
+                  <a href={product.creator.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                    Twitter →
+                  </a>
+                )}
+                {product.creator.websiteUrl && (
+                  <a href={product.creator.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                    Website →
+                  </a>
+                )}
               </div>
             )}
           </div>

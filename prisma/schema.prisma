@@ -50,6 +50,29 @@ model User {
   status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
 
+  // Profile fields (shared)
+  phone      String?
+  avatar     String?
+  city       String?
+  state      String?
+  pincode    String?
+  country    String?
+  address    String?   @db.Text
+  notifyEmail Boolean  @default(true)
+
+  // Creator-specific profile fields
+  bio              String?  @db.Text
+  currentProject   String?  @db.Text
+  founderStory     String?  @db.Text
+  teamDetails      String?  @db.Text
+  linkedinUrl      String?
+  twitterUrl       String?
+  websiteUrl       String?
+  experienceLevel  String?
+  skills           String[]
+  location         String?
+  bannerImage      String?
+
   accounts      Account[]
   products      Product[]
   orders        Order[]
