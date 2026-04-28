@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
@@ -365,20 +365,46 @@ const Arrow = () => (
   </svg>
 )
 
+/* ─── DROPDOWN ITEM HELPER ──────────────────────────────────────────────── */
+function DropItem({ href, onClick, children }: { href: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      style={{
+        display: 'block', padding: '8px 12px', fontSize: '13px',
+        color: '#bbb', borderRadius: '10px', textDecoration: 'none',
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; (e.currentTarget as HTMLElement).style.color = '#bbb' }}
+    >
+      {children}
+    </Link>
+  )
+}
+
 /* ─── HOME CLIENT ────────────────────────────────────────────────────────── */
 export default function HomeClient({ launches, readyProducts = [], preorderProducts = [] }: { launches: Launch[]; readyProducts?: ReadyProduct[]; preorderProducts?: PreorderProduct[] }) {
   const { data: session } = useSession()
 
-  // Determine dashboard link based on role
-  const getDashboardHref = () => {
-    if (!session) return null
-    if (session.user.role === 'ADMIN') return { href: '/admin', label: 'Admin Dashboard' }
-    if (session.user.role === 'CREATOR') return { href: '/creator', label: 'Dashboard' }
-    return { href: '/orders', label: 'My Orders' }
-  }
-  const dashLink = getDashboardHref()
+  // Role helpers for nav
+  const role = session?.user?.role ?? null
+  const initials = session?.user?.name
+    ? session.user.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?'
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Close dropdown on outside click
+    const closeDropdown = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', closeDropdown)
+
     // Scroll-reveal animations
     const obs = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
@@ -420,6 +446,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
 
     return () => {
       obs.disconnect()
+      document.removeEventListener('mousedown', closeDropdown)
       window.removeEventListener('message', msgHandler)
       toggle?.removeEventListener('click', handleToggle)
       anchors.forEach(l => l.removeEventListener('click', handleAnchor))
@@ -444,29 +471,98 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
             <a href="#how-buyers">For Buyers</a>
             <a href="#legal">Trust</a>
             <a href="#apply">Apply</a>
-            {dashLink && (
-              <Link href={dashLink.href} style={{ color: 'var(--orange-400)' }}>
-                {dashLink.label}
-              </Link>
-            )}
           </div>
 
           <div className="nav-ctas">
+            {/* Contact Us — always visible */}
+            <a href="#contact" className="btn btn-secondary btn-small">Contact Us</a>
+
             {session ? (
-              <>
-                {dashLink && (
-                  <Link href={dashLink.href} className="btn btn-secondary btn-small">
-                    {dashLink.label}
-                  </Link>
-                )}
+              /* ── Profile dropdown ─────────────────────────────── */
+              <div ref={dropdownRef} style={{ position: 'relative' }}>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="btn btn-primary btn-small"
-                  style={{ cursor: 'pointer' }}
+                  onClick={() => setDropdownOpen(o => !o)}
+                  style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #E8651A, #F5B731)',
+                    border: 'none', cursor: 'pointer', color: '#fff',
+                    fontWeight: 700, fontSize: '13px', letterSpacing: '0.5px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'transform 0.2s',
+                    outline: dropdownOpen ? '2px solid rgba(232,101,26,.5)' : 'none',
+                    outlineOffset: '2px',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  aria-label="Profile menu"
                 >
-                  Sign out
+                  {initials}
                 </button>
-              </>
+
+                {dropdownOpen && (
+                  <div style={{
+                    position: 'absolute', right: 0, top: '44px',
+                    width: '200px', background: '#111',
+                    border: '1px solid rgba(255,255,255,.1)',
+                    borderRadius: '16px', boxShadow: '0 20px 60px rgba(0,0,0,.6)',
+                    overflow: 'hidden', zIndex: 200,
+                  }}>
+                    {/* Header */}
+                    <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+                      <p style={{ fontSize: '13px', fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {session.user.name}
+                      </p>
+                      <p style={{ fontSize: '11px', color: '#666', margin: '2px 0 0', textTransform: 'capitalize' }}>
+                        {role?.toLowerCase()}
+                      </p>
+                    </div>
+
+                    {/* Admin */}
+                    {role === 'ADMIN' && (
+                      <div style={{ padding: '6px' }}>
+                        <DropItem href="/admin" onClick={() => setDropdownOpen(false)}>Dashboard</DropItem>
+                      </div>
+                    )}
+
+                    {/* Creator */}
+                    {role === 'CREATOR' && (
+                      <div style={{ padding: '6px' }}>
+                        <DropItem href="/creator" onClick={() => setDropdownOpen(false)}>Dashboard</DropItem>
+                        <DropItem href="/profile" onClick={() => setDropdownOpen(false)}>My Profile</DropItem>
+                        <DropItem href="/change-password" onClick={() => setDropdownOpen(false)}>Change Password</DropItem>
+                      </div>
+                    )}
+
+                    {/* Customer */}
+                    {role === 'CUSTOMER' && (
+                      <div style={{ padding: '6px' }}>
+                        <DropItem href="/orders" onClick={() => setDropdownOpen(false)}>My Orders</DropItem>
+                        <DropItem href="/profile" onClick={() => setDropdownOpen(false)}>My Profile</DropItem>
+                        <DropItem href="/checkout" onClick={() => setDropdownOpen(false)}>My Cart</DropItem>
+                        <DropItem href="/change-password" onClick={() => setDropdownOpen(false)}>Change Password</DropItem>
+                      </div>
+                    )}
+
+                    {/* Sign out */}
+                    <div style={{ padding: '6px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
+                      <button
+                        onClick={() => { setDropdownOpen(false); signOut({ callbackUrl: '/' }) }}
+                        style={{
+                          width: '100%', textAlign: 'left', padding: '8px 12px',
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: '13px', color: '#f87171', borderRadius: '10px',
+                          transition: 'background 0.15s',
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(248,113,113,.08)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link href="/login" className="btn btn-secondary btn-small">Login</Link>
