@@ -22,8 +22,8 @@ export function formatDate(date: Date | string) {
 }
 
 export function calculateFees(amount: number) {
-  const platformFee = Math.round(amount * 0.1 * 100) / 100
-  const creatorEarnings = Math.round(amount * 0.9 * 100) / 100
+  const platformFee = Math.round(amount * 0.07 * 100) / 100
+  const creatorEarnings = Math.round(amount * 0.93 * 100) / 100
   return { platformFee, creatorEarnings }
 }
 

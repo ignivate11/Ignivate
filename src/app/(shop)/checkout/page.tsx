@@ -80,7 +80,6 @@ export default function CheckoutPage() {
     }
   }
 
-  const platformFee = total * 0.1
   const itemCount = items.reduce((s, i) => s + i.quantity, 0)
 
   if (items.length === 0) {
@@ -194,10 +193,7 @@ export default function CheckoutPage() {
                 <span>Subtotal ({itemCount} item{itemCount !== 1 ? 's' : ''})</span>
                 <span>{formatCurrency(total)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Platform fee (10%)</span>
-                <span className="text-red-400/70">+{formatCurrency(platformFee)}</span>
-              </div>
+
             </div>
 
             <div className="border-t border-white/8 pt-4 mb-6">
@@ -205,7 +201,6 @@ export default function CheckoutPage() {
                 <span>Total</span>
                 <span className="text-orange-400">{formatCurrency(total)}</span>
               </div>
-              <p className="text-xs text-gray-600 mt-1">Platform fee included in total</p>
             </div>
 
             {/* Payment button */}
