@@ -51,7 +51,7 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
         <StatCard label="Total Revenue" value={formatCurrency(stats.totalRevenue)} sub={`${stats.totalOrders} orders`} href="/admin/analytics" />
-        <StatCard label="Platform Commission" value={formatCurrency(stats.platformCommission)} sub="10% of total revenue" />
+        <StatCard label="Platform Commission" value={formatCurrency(stats.platformCommission)} sub="7% of total revenue" />
         <StatCard label="Creators" value={String(stats.totalCreators)} href="/admin/creators" />
         <StatCard label="Customers" value={String(stats.totalCustomers)} href="/admin/customers" />
       </div>

@@ -71,7 +71,7 @@ export default async function CreatorDashboard() {
           <div className="bg-white/3 border border-white/6 rounded-xl p-4">
             <p className="text-xs text-gray-500 mb-1 font-mono uppercase tracking-wider">Platform Fee</p>
             <p className="text-2xl font-bold text-red-400">−{formatCurrency(platformFee)}</p>
-            <p className="text-xs text-gray-600 mt-1">10% commission</p>
+            <p className="text-xs text-gray-600 mt-1">7% commission</p>
           </div>
           <div className="bg-orange-500/5 border border-orange-500/15 rounded-xl p-4">
             <p className="text-xs text-orange-400 mb-1 font-mono uppercase tracking-wider">Net Earnings</p>

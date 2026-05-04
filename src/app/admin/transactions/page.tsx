@@ -51,8 +51,8 @@ export default async function AdminTransactionsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Revenue', value: formatCurrency(totals._sum.totalAmount ?? 0), sub: `${totals._count} paid orders` },
-          { label: 'Platform Commission', value: formatCurrency(totals._sum.platformFee ?? 0), sub: '10% of gross' },
-          { label: 'Creator Earnings', value: formatCurrency(totals._sum.creatorEarnings ?? 0), sub: '90% of gross — awaiting payout' },
+          { label: 'Platform Commission', value: formatCurrency(totals._sum.platformFee ?? 0), sub: '7% of gross' },
+          { label: 'Creator Earnings', value: formatCurrency(totals._sum.creatorEarnings ?? 0), sub: '93% of gross — awaiting payout' },
           { label: 'Pending Orders', value: String(orders.filter(o => o.paymentStatus === 'PENDING').length), sub: 'Not yet paid' },
         ].map(s => (
           <div key={s.label} className="bg-[#111] border border-white/8 rounded-2xl p-5">

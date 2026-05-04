@@ -30,8 +30,8 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
         {[
           { label: 'Total Revenue', value: formatCurrency(revenue._sum.totalAmount ?? 0), sub: `${revenue._count} paid orders` },
-          { label: 'Platform Commission', value: formatCurrency(revenue._sum.platformFee ?? 0), sub: '10% of total' },
-          { label: 'Creator Earnings', value: formatCurrency(revenue._sum.creatorEarnings ?? 0), sub: '90% of total' },
+          { label: 'Platform Commission', value: formatCurrency(revenue._sum.platformFee ?? 0), sub: '7% of total' },
+          { label: 'Creator Earnings', value: formatCurrency(revenue._sum.creatorEarnings ?? 0), sub: '93% of total' },
         ].map(stat => (
           <div key={stat.label} className="bg-[#111] border border-white/8 rounded-2xl p-6">
             <p className="text-xs font-mono text-orange-400 uppercase tracking-widest mb-2">{stat.label}</p>
