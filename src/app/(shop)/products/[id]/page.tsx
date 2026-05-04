@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import Image from 'next/image'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import AddToCartButton from './AddToCartButton'
+import BuyNowButton from './BuyNowButton'
 import StarRating from '@/components/products/StarRating'
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -218,11 +219,28 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
               <FundingBar current={product.currentFunding || 0} goal={product.fundingGoal} />
             )}
 
-            <AddToCartButton
-              product={{ ...product, creator: product.creator }}
-              session={session}
-              isPreorder={isPreorder}
-            />
+            {session?.user.role === 'CUSTOMER' ? (
+              <div className="space-y-2">
+                <BuyNowButton
+                  productId={product.id}
+                  displayPrice={isPreorder && product.preorderPrice ? product.preorderPrice : product.price}
+                  userName={session.user.name ?? ''}
+                  userEmail={session.user.email ?? ''}
+                  isPreorder={isPreorder}
+                />
+                <AddToCartButton
+                  product={{ ...product, creator: product.creator }}
+                  session={session}
+                  isPreorder={isPreorder}
+                />
+              </div>
+            ) : (
+              <AddToCartButton
+                product={{ ...product, creator: product.creator }}
+                session={session}
+                isPreorder={isPreorder}
+              />
+            )}
           </div>
 
           {/* ── Timeline (preorder) ───────────────────────────── */}

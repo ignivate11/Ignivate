@@ -41,6 +41,12 @@ enum SaleCategory {
   PREORDER
 }
 
+
+enum PayoutStatus {
+  PENDING
+  PAID
+}
+
 model User {
   id        String     @id @default(cuid())
   name      String
@@ -79,6 +85,7 @@ model User {
   cart          Cart[]
   passwordResets PasswordResetToken[]
   ratings        Rating[]
+  payouts        Payout[]
 
   @@index([email])
   @@index([role])
@@ -222,4 +229,20 @@ model Rating {
   @@unique([userId, productId])
   @@index([productId])
   @@index([userId])
+}
+
+model Payout {
+  id             String       @id @default(cuid())
+  creatorId      String
+  amount         Float
+  status         PayoutStatus @default(PENDING)
+  note           String?
+  ordersIncluded String[]     // razorpayOrderIds included in this payout
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  creator User @relation(fields: [creatorId], references: [id])
+
+  @@index([creatorId])
+  @@index([status])
 }
