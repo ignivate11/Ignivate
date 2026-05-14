@@ -388,7 +388,7 @@ function DropItem({ href, onClick, children }: { href: string; onClick: () => vo
 export default function HomeClient({ launches, readyProducts = [], preorderProducts = [] }: { launches: Launch[]; readyProducts?: ReadyProduct[]; preorderProducts?: PreorderProduct[] }) {
   const { data: session } = useSession()
 
-  // Role helpers for nav
+  // Role helpers for nav dropdown
   const role = session?.user?.role ?? null
   const initials = session?.user?.name
     ? session.user.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
@@ -507,7 +507,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                     borderRadius: '16px', boxShadow: '0 20px 60px rgba(0,0,0,.6)',
                     overflow: 'hidden', zIndex: 200,
                   }}>
-                    {/* Header */}
+                    {/* User info */}
                     <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.06)' }}>
                       <p style={{ fontSize: '13px', fontWeight: 600, color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {session.user.name}
@@ -599,7 +599,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                 <Link href="/products" className="btn btn-secondary">Explore launches</Link>
               </div>
               <p className="hero-discover fade-up s3">
-                <Link href="/products">Discover and support new products →</Link>
+                <Link href="/products">Pre-order products directly from creators →</Link>
               </p>
               <p className="hero-tagline fade-up s4">Launching new ideas across India</p>
             </div>
@@ -691,7 +691,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
       {/* ── BUYER STRIP 1 ────────────────────────────────────────────────── */}
       <div className="cta-strip buyer">
         <div className="container"><div className="inner">
-          <p><strong>Explore products launching now</strong> — discover what creators are building</p>
+          <p><strong>Browse products launching now</strong> — pre-order directly from creators</p>
           <Link href="/products" className="btn btn-green btn-xs">Browse launches →</Link>
         </div></div>
       </div>
@@ -702,12 +702,12 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
           <div className="audience-divider"><span>For early adopters</span></div>
           <div style={{ marginTop: '40px' }}>
             <span className="section-label fade-up" style={{ color: 'var(--green-muted)' }}>Discover</span>
-            <h2 className="section-heading fade-up">For early adopters.</h2>
-            <p className="section-sub fade-up">Discover new products before they go mainstream. Support creators early and get exclusive access.</p>
+            <h2 className="section-heading fade-up">For early buyers.</h2>
+            <p className="section-sub fade-up">Discover new products before they go mainstream. Pre-order early and get exclusive pricing before public launch.</p>
             <div className="grid-3">
-              <div className="pain-card buyer-card fade-up s1"><div className="pain-icon buyer-icon">🌟</div><h3>Be the first</h3><p>Try new ideas and products before anyone else. Get early access to what&apos;s next.</p></div>
-              <div className="pain-card buyer-card fade-up s2"><div className="pain-icon buyer-icon">🤝</div><h3>Support creators early</h3><p>Your pre-order directly supports the creator and helps bring their vision to life.</p></div>
-              <div className="pain-card buyer-card fade-up s3"><div className="pain-icon buyer-icon">💰</div><h3>Early access pricing</h3><p>Pre-order at special early pricing before the product launches at full price.</p></div>
+              <div className="pain-card buyer-card fade-up s1"><div className="pain-icon buyer-icon">🌟</div><h3>Be the first</h3><p>Pre-order products before public launch. Get early access pricing on what&apos;s next.</p></div>
+              <div className="pain-card buyer-card fade-up s2"><div className="pain-icon buyer-icon">🤝</div><h3>Early access purchase</h3><p>Your pre-order secures your product before launch at an exclusive early price.</p></div>
+              <div className="pain-card buyer-card fade-up s3"><div className="pain-icon buyer-icon">💰</div><h3>Launch pricing</h3><p>Reserve your product at launch pricing before it goes on sale to the general public.</p></div>
             </div>
             <div style={{ marginTop: '36px' }} className="fade-up">
               <Link href="/products" className="btn btn-green">Explore live launches <Arrow /></Link>
@@ -760,10 +760,6 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                 </Link>
               </div>
             </>
-          ) : launches.length > 0 ? (
-            <div className="launches-grid" style={{ marginTop: '48px' }}>
-              {launches.map(l => <LaunchCard key={l.id} launch={l} />)}
-            </div>
           ) : (
             <div className="launches-grid" style={{ gridTemplateColumns: '1fr', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto', marginTop: '48px' }}>
               <div className="coming-soon-card fade-up s1" style={{ minHeight: '320px' }}>
@@ -780,7 +776,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
       {/* ── BUYER STRIP 2 ────────────────────────────────────────────────── */}
       <div className="cta-strip buyer">
         <div className="container"><div className="inner">
-          <p><strong>Support a product today</strong> — every pre-order helps a creator ship</p>
+          <p><strong>Pre-order a product today</strong> — get early access before public launch</p>
           <Link href="/products" className="btn btn-green btn-xs">Pre-order now →</Link>
         </div></div>
       </div>
@@ -789,7 +785,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
       {preorderProducts.length > 0 && (
         <section className="section" id="preorders">
           <div className="container">
-            <span className="section-label fade-up" style={{ color: 'var(--amber)' }}>Funding Now</span>
+            <span className="section-label fade-up" style={{ color: 'var(--amber)' }}>Pre-ordering Now</span>
             <h2 className="section-heading fade-up">Pre-Order Launches.</h2>
             <p className="section-sub fade-up">Back these products before they ship. Get early pricing and help bring them to life.</p>
             <div className="launches-grid" style={{ marginTop: '40px' }}>
@@ -830,8 +826,8 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                             <div className="funding-bar-fill" style={{ width: `${pct}%` }} />
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                            <span style={{ color: 'var(--amber)', fontWeight: 700 }}>{pct}% funded</span>
-                            <span style={{ color: 'var(--gray-500)' }}>of ₹{p.fundingGoal.toLocaleString('en-IN')} goal</span>
+                            <span style={{ color: 'var(--amber)', fontWeight: 700 }}>{pct}% pre-ordered</span>
+                            <span style={{ color: 'var(--gray-500)' }}>of ₹{p.fundingGoal.toLocaleString('en-IN')} target</span>
                           </div>
                         </div>
                       )}
@@ -843,7 +839,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                           )}
                         </div>
                         <span className="btn btn-primary" style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '40px' }}>
-                          Fund Now →
+                          Pre-order →
                         </span>
                       </div>
                     </div>
@@ -888,7 +884,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
             <p className="section-sub fade-up">Discover, support, and get early access in four simple steps.</p>
             <div className="grid-4" style={{ counterReset: 'step' }}>
               <div className="step step-green fade-up s1"><h3>Discover new products</h3><p>Browse live launches and find products that excite you.</p></div>
-              <div className="step step-green fade-up s2"><h3>Pre-order early</h3><p>Support the creator with an early access pre-order at a special price.</p></div>
+              <div className="step step-green fade-up s2"><h3>Pre-order early</h3><p>Reserve your product at an early-access price before the public launch.</p></div>
               <div className="step step-green fade-up s3"><h3>Creator builds &amp; ships</h3><p>Follow the creator&apos;s progress with regular updates as they build.</p></div>
               <div className="step step-green fade-up s4"><h3>You get early access</h3><p>Be among the first to receive the product before it goes mainstream.</p></div>
             </div>
@@ -914,11 +910,11 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
       <section className="section" id="trust-buyers">
         <div className="container">
           <span className="section-label fade-up" style={{ color: 'var(--green-muted)' }}>Trust</span>
-          <h2 className="section-heading fade-up">Buy with confidence.</h2>
-          <p className="section-sub fade-up">Pre-ordering on Ignivate is transparent, safe, and directly supports creators.</p>
+          <h2 className="section-heading fade-up">Pre-order with confidence.</h2>
+          <p className="section-sub fade-up">Pre-ordering on Ignivate is transparent, safe, and directly from the creator.</p>
           <div className="trust-grid">
-            <div className="trust-card buyer-card fade-up s1"><div className="trust-icon">🔓</div><h3>Transparent pre-order model</h3><p>You always know exactly what you&apos;re pre-ordering, when it ships, and what to expect. No hidden terms.</p></div>
-            <div className="trust-card buyer-card fade-up s2"><div className="trust-icon">🤝</div><h3>Direct support to creators</h3><p>Your pre-order goes directly to the creator. You&apos;re helping real people build real products.</p></div>
+            <div className="trust-card buyer-card fade-up s1"><div className="trust-icon">🔓</div><h3>Transparent pre-order model</h3><p>You always know exactly what you&apos;re purchasing, when it ships, and what to expect. No hidden terms.</p></div>
+            <div className="trust-card buyer-card fade-up s2"><div className="trust-icon">🤝</div><h3>Direct from creator</h3><p>Your pre-order goes directly to the creator. You purchase directly from the person building the product.</p></div>
             <div className="trust-card buyer-card fade-up s3"><div className="trust-icon">📨</div><h3>Regular updates from founders</h3><p>Get progress updates directly from the creator throughout the build and shipping process.</p></div>
           </div>
         </div>
@@ -927,7 +923,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
       {/* ── BUYER STRIP 3 ────────────────────────────────────────────────── */}
       <div className="cta-strip buyer">
         <div className="container"><div className="inner">
-          <p><strong>Be part of early launches</strong> — discover what&apos;s next before everyone else</p>
+          <p><strong>Be an early buyer</strong> — pre-order products before they go mainstream</p>
           <Link href="/products" className="btn btn-green btn-xs">Explore now →</Link>
         </div></div>
       </div>
@@ -943,7 +939,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
               <div className="cs-pulse" />
               <div className="cs-icon">📊</div>
               <h3>Coming Soon..</h3>
-              <p>We&apos;re tracking our progress and will share real numbers here soon.<br />We believe in transparency — no inflated metrics, just honest growth.</p>
+              <p>We&apos;re tracking our pre-order numbers and will share them here soon.<br />We believe in transparency — no inflated metrics, just real sales data.</p>
             </div>
           </div>
         </div>
@@ -978,7 +974,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
                 <li><span className="perk-icon">📣</span><span>Promotion on Instagram, X, and LinkedIn</span></li>
                 <li><span className="perk-icon">💡</span><span>Strategy and feedback to polish your project</span></li>
                 <li><span className="perk-icon">🤝</span><span>Community support to keep you motivated</span></li>
-                <li><span className="perk-icon">💰</span><span>Crowdfunding support to turbocharge growth</span></li>
+                <li><span className="perk-icon">💰</span><span>Pre-order campaign support to drive early sales</span></li>
               </ul>
             </div>
             <div className="form-card fade-up s1">
@@ -1029,7 +1025,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
           <div className="legal-grid">
             <div className="legal-card fade-up s1">
               <div className="legal-card-header"><div className="legal-card-icon">📋</div><h3>Platform Disclaimer</h3></div>
-              <p>Ignivate is a product discovery and launch platform. We connect creators with early adopters through pre-orders.</p>
+              <p>Ignivate is a pre-order commerce marketplace. We connect creators with early customers through product pre-orders. This platform does not facilitate investments, donations, or securities of any kind.</p>
               <p className="muted" style={{ fontWeight: 600, marginBottom: '8px' }}>We do not:</p>
               <ul className="legal-list cross">
                 <li>Offer any form of financial opportunity or returns</li>
@@ -1044,7 +1040,7 @@ export default function HomeClient({ launches, readyProducts = [], preorderProdu
             </div>
             <div className="legal-card fade-up s2">
               <div className="legal-card-header"><div className="legal-card-icon">📦</div><h3>Pre-order Model</h3></div>
-              <p>All purchases made through Ignivate are pre-orders. This means the product may not be immediately available at the time of purchase.</p>
+              <p>All purchases made through Ignivate are product purchases or pre-orders. Customers do not receive equity, ownership, or financial returns. Pre-order purchases are intended for early access to products before public launch.</p>
               <ul className="legal-list">
                 <li>Products may be in development or early stages at the time of listing</li>
                 <li>Delivery timelines are determined by the creator, not Ignivate</li>

@@ -33,7 +33,7 @@ export default function AddToCartButton({ product, session, isPreorder }: Props)
       }}
       className="w-full bg-gradient-to-r from-orange-600 to-orange-400 text-white font-semibold py-3.5 rounded-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-orange-500/25"
     >
-      {isPreorder ? '🚀 Pre-order Now' : 'Add to Cart'}
+      🛒 Add to Cart
     </button>
   )
 }

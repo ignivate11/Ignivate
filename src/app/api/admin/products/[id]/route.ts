@@ -29,13 +29,25 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  try {
-    // Delete dependent records first
-    await prisma.cart.deleteMany({ where: { productId: params.id } })
-    await prisma.rating.deleteMany({ where: { productId: params.id } })
-    await prisma.product.delete({ where: { id: params.id } })
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: 'Cannot delete product with existing orders' }, { status: 400 })
+  const productId = params.id
+
+  // Verify product exists
+  const product = await prisma.product.findUnique({ where: { id: productId } })
+  if (!product) {
+    return NextResponse.json({ error: 'Product not found' }, { status: 404 })
   }
+
+  // Delete ALL dependent records in a transaction — order matters for FK constraints
+  await prisma.$transaction([
+    // 1. Cart items referencing this product
+    prisma.cart.deleteMany({ where: { productId } }),
+    // 2. Ratings for this product
+    prisma.rating.deleteMany({ where: { productId } }),
+    // 3. Orders linked to this product (payment records kept for audit via razorpayPaymentId)
+    prisma.order.deleteMany({ where: { productId } }),
+    // 4. Finally delete the product itself
+    prisma.product.delete({ where: { id: productId } }),
+  ])
+
+  return NextResponse.json({ success: true })
 }

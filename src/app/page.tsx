@@ -3,24 +3,8 @@ import { prisma } from '@/lib/prisma'
 import HomeClient from './HomeClient'
 
 export default async function HomePage() {
-  const [launches, readyProducts, preorderProducts] = await Promise.all([
-    // Admin-curated featured launches (Launch table)
-    prisma.launch.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        productName: true,
-        creatorName: true,
-        creatorDescription: true,
-        productDescription: true,
-        usp: true,
-        price: true,
-        images: true,
-        launchType: true,
-      },
-    }),
-    // Approved READY products from creators
+  const [readyProducts, preorderProducts] = await Promise.all([
+    // Only APPROVED READY products from the Product table — no fallbacks, no mock data
     prisma.product.findMany({
       where: { status: 'APPROVED', saleCategory: 'READY' },
       orderBy: { createdAt: 'desc' },
@@ -37,7 +21,7 @@ export default async function HomePage() {
         creator: { select: { name: true } },
       },
     }),
-    // Approved PREORDER products from creators
+    // Only APPROVED PREORDER products
     prisma.product.findMany({
       where: { status: 'APPROVED', saleCategory: 'PREORDER' },
       orderBy: { createdAt: 'desc' },
@@ -60,5 +44,5 @@ export default async function HomePage() {
     }),
   ])
 
-  return <HomeClient launches={launches} readyProducts={readyProducts} preorderProducts={preorderProducts} />
+  return <HomeClient launches={[]} readyProducts={readyProducts} preorderProducts={preorderProducts} />
 }
